@@ -1,3 +1,5 @@
+#I declare that I will adhere to all principles of academic honesty and integrity throughout my stay in the institute.
+
 import model
 import argparse
 import pickle
