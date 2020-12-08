@@ -1,26 +1,21 @@
 ![TAC-GAN](https://chalelele.files.wordpress.com/2017/05/logo.png)
 
-This is the official Tensorflow implementation of TAC-GAN model presented in
-[https://arxiv.org/abs/1703.06412](https://arxiv.org/abs/1703.06412).
+This is the Tensorflow implementation of TAC-GAN model presented in
+the presentation. 
 
 Text Conditioned Auxiliary Classifier Generative Adversarial Network,
 (TAC-GAN) is a text to image Generative Adversarial Network (GAN) for
-synthesizing images from their text descriptions. TAC-GAN builds upon the
-[AC-GAN](https://arxiv.org/abs/1610.09585) by conditioning the generated images
+synthesizing images from their text descriptions. TAC-GAN builds by conditioning the generated images
 on a text description instead of on a class label. In the presented TAC-GAN
 model, the input vector of the Generative network is built based on a noise
 vector and another vector containing an embedded representation of the
-textual description. While the Discriminator is similar to that of
-the AC-GAN, it is also augmented to receive the text information as
+textual description. The Discriminator is augmented to receive the text information as
 input before performing its classification.
 
-For embedding the textual descriptions of the images into vectors we used
+For embedding the textual descriptions of the images into vectors I used
 [skip-thought vectors](https://arxiv.org/abs/1506.06726)
 
-The following is the architecture of the TAC-GAN model
 
-<img src="https://chalelele.files.wordpress.com/2017/05/tac-gan-1.png"
-height="700" width="400" style="float:center">
 
 # Prerequisites
 Some important dependencies are the following and the rest can be installed 
@@ -35,23 +30,15 @@ It is recommended to use a virtual environment for running this project and
 installing the required dependencies in it by using the
 [***requirements.txt***](https://github.com/dashayushman/TAC-GAN/blob/master/requirements.txt) file.
 
-The project has been tested on a Ubuntu 14.04 machine with an 12 GB NVIDIA
-Titen X GPU
 
 # 1. Setup and Run
 
-## 1.1. Clone the Repository
 
-```
-git clone https://github.com/dashayushman/TAC-GAN.git
-cd TAC-GAN
-```
+## 1.1. Download the Dataset
 
-## 1.2. Download the Dataset
-
-The model presented in the paper was trained on the
-[flowers dataset](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/ ). This
-To train the TAC-GAN on the flowers dataset, first, download the dataset by
+The model presented in the paper was trained on the Oxford-102
+[flowers dataset](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/ ).
+To train TAC-GAN on the flowers dataset, first, download the dataset by
 doing the following,
 
 1. **Download the flower images** from
@@ -71,7 +58,7 @@ the downloaded files to ```Data/skipthoughts```
 **NB:** *It is recommended to keep all the images in an SSD if available. This
  makes the batch loading and processing operation faster.*
 
-## 1.3. Data Preprocessing
+## 1.2. Data Preprocessing
 Extract the skip-thought features for the captions and prepare the dataset
 for training by running the following script
 
@@ -87,7 +74,7 @@ FLAG | VALUE TYPE | DEFAULT VALUE | DESCRIPTION
 data_dir | str | Data | The data directory |
 dataset | str | flowers | Dataset to use. For Eg., "flowers" |
 
-## 1.4. Training
+## 1.3. Training
 
 To train TAC-GAN with the default hyper parameters run the following script
 
@@ -125,22 +112,6 @@ We used the following script (hyper-parameters) in for the results that we show 
 python train.py --t_dim=100 --image_size=128 --data_set=flowers --model_name=TAC_GAN --train=True --resume_model=True --z_dim=100 --n_classes=102 --epochs=400 --save_every=20 --caption_vector_length=4800 --batch_size=128
 ```
 
-## 1.5. Monitoring
-
-While training, you can monitor the updates on the *terminal* as well as by using [*tensorboard*](https://www.tensorflow.org/get_started/summaries_and_tensorboard)
-
-### 1.5.1 The Terminal:
-![Terminal log](https://chalelele.files.wordpress.com/2017/06/terminal_log.png)
-
-### 1.5.1 Tensorboard:
-
-You can use the following script to start tensorboard and visualize realtime changes:
-
-```
-tensorboard --logdir=Data/training/TAC_GAN/summaries
-```
-
-![Tensorboard](https://chalelele.files.wordpress.com/2017/06/tb.png)
 
 # 2. Generating Images for the text in the dataset
 
@@ -269,69 +240,14 @@ python utility/plot_msssim.py --input_file=Data/msssim.tsv --output_file=Data/ms
 
 This will create ```Data/msssim.pdf```, which is the ***.pdf*** file of the generated figure.
 
-# 5. Generate Interpolated Images
 
-In our paper we show the effect of interpolating the noise and the text embedding vectors on the generated image. Images are randomply selected and their text descriptions are used to generate synthetic images. The following sub-sections will elaborate on how to do it and which scripts will help you in doing it.
+# 5. References
 
-## 5.1 Z (Noise) Interpolation
 
-For interpolating the noise vector and generating images, use the following scripts
-
-```
-python z_interpolation.py --output_dir=Data/synthetic_dataset --data_set=flowers --checkpoints_dir=Data/training/TAC_GAN/checkpoints --n_images=500
-```
-
-This will generate the interpolated images in ```Data/synthetic_dataset/z_interpolation/```.
-
-## 5.1 T (Text Embedding) Interpolation
-
-For interpolating the text embedding vectors and generating images, use the following scripts
-
-```
-python t_interpolation.py --output_dir=Data/synthetic_dataset --data_set=flowers --checkpoints_dir=Data/training/TAC_GAN/checkpoints --n_images=500
-```
-
-This will generate the interpolated images in ```Data/synthetic_dataset/t_interpolation/```.
-
-***NOTE:*** Both the above mentioned scripts have the same flags/arguments, which are the following,
-
-FLAG | VALUE TYPE | DEFAULT VALUE | DESCRIPTION
---- | --- | --- | ---
-z-dim | int | 100 | Number of dimensions of the Noise vector |
-t_dim | int | 256 | Number of dimensions for the latent representation of the text embedding.
-batch_size | int | 64 | Mini-Batch Size
-image_size | int | 128 | Batch size to use during training.
-gf_dim | int | 64 | Number of conv filters in the first layer of the generator.
-df_dim | int | 64 | Number of conv filters in the first layer of the discriminator.
-caption_vector_length | int | 4800 | Length of the caption vector embedding (vector generated using skip-thought vectors model).
-n_classes | int | 102 | Number of classes
-data_dir | String | Data | Data directory
-learning_rate | float | 0.0002 | Learning rate
-beta1 | float | 0.5 | Momentum for Adam Update
-data_set | str | flowers | The dataset to use: "flowers"
-output_dir | String | Data/synthetic_dataset | The directory in which the t_interpolated images will be generated
-checkpoints_dir | String | /tmp | Path to the checkpoints directory which will be used to generate the images
-n_interp | int | 100 | The factor difference between each interpolation (Should ideally be a multiple of 10)
-n_images | int | 500 | Number of images to randomply sample for generating interpolation results
-
-# 6. References
-
-### TAC-GAN
-
-If you find this code usefull, then please use the following BibTex to cite our work.
-
-```
-@article{dash2017tac,
-  title={TAC-GAN-Text Conditioned Auxiliary Classifier Generative Adversarial Network},
-  author={Dash, Ayushman and Gamboa, John Cristian Borges and Ahmed, Sheraz and Afzal, Muhammad Zeshan and Liwicki, Marcus},
-  journal={arXiv preprint arXiv:1703.06412},
-  year={2017}
-}
-```
 
 ### Oxford-102 Flowers Dataset
 
-If you use the Oxford-102 Flowers Dataset, then please cite their work using the following BibTex.
+I have used the Oxford-102 Flowers Dataset. The authors are Nilsback, M-E. and Zisserman, A. The title is "Automated Flower Classification over a Large Number of Classes".
 
 ```
 @InProceedings{Nilsback08,
@@ -345,17 +261,12 @@ If you use the Oxford-102 Flowers Dataset, then please cite their work using the
 
 ### Skip-Thought
 
-If you use the Skip-Thought model in your work like us, then please cite their work using the following BibTex
+I have used the Skip-Thought model in this work. The authors are Kiros, Ryan and Zhu, Yukun and Salakhutdinov, Ruslan and Zemel, Richard S and Torralba, Antonio and Urtasun, Raquel and Fidler, Sanja. 
+The title of their paper is "Skip-Thought Vectors". 
 
-```
-@article{kiros2015skip,
-  title={Skip-Thought Vectors},
-  author={Kiros, Ryan and Zhu, Yukun and Salakhutdinov, Ruslan and Zemel, Richard S and Torralba, Antonio and Urtasun, Raquel and Fidler, Sanja},
-  journal={arXiv preprint arXiv:1506.06726},
-  year={2015}
-}
-```
+
 
 ### Code
 
-We have referred to the [text-to-image](https://github.com/paarthneekhara/text-to-image) and [DCGAN-tensorflow](https://github.com/carpedm20/DCGAN-tensorflow) repositories for developing our code, and we are extremely thankful to them.
+I have heavily referred to and borrowed from the [text-to-image](https://github.com/dashayushman/TAC-GAN) and [DCGAN-tensorflow](https://github.com/carpedm20/DCGAN-tensorflow) repositories for developing this code, and I are extremely thankful to them.
+I accept that my contribution is infinitesimal compared to the contribution of Ayushman Dash, the one from whose repository a majority of this code is derived. 
